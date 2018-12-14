@@ -1,0 +1,189 @@
+\documentclass[a4paper,notitlepage]{article}
+
+% inlcude all these packages unless you have reason not to...
+\usepackage{polyglossia}
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{expex}
+\usepackage{natbib}
+\usepackage{amsmath}
+
+% Make licence footnote without marker
+\makeatletter
+\def\blfootnote{\gdef\@thefnmark{}\@footnotetext}
+\makeatother
+
+% Use a Free/Libre font with Finnish–Hungarian-Cyrillic-UPA coverage
+\setmainfont[Mapping=tex-text]{Linux Libertine O}
+% set languages to use
+\setmainlanguage{english}
+\setotherlanguages{finnish,russian}
+
+% This makes it easier to create anonymised and final versions with one change:
+\newif\ifcameraready
+%%% *** Uncomment the following line for the for-review submission
+%\camerareadyfalse
+%%% *** Uncomment the following line for the for-publication submission
+\camerareadytrue
+%%% and comment the other line so as to only have one of the above statements
+%%% uncommented
+
+\begin{document}
+
+
+\begin{abstract}
+Hill Mari language is one of those minor languages of Russia which, unlike major languages, have not so many processing and analysis tools created or adopted for them. In the current work we would like to present our Snowball stemmer for Hill Mari  which is our first step towards creation of a parser for this language.
+\end{abstract}
+
+{
+\selectlanguage{russian}
+\begin{abstract}
+Горномарийский язык - один из многих малых  языков России, для которых, в отличие от крупных языков, разработано не так много инструментов для его анализа и сохранения. В настоящей работе, которая является одним из первых шагов на пути к разработке полноценного горномарийского парсера, мы описываем созданный нами стеммер Портера для данного языка.
+\end{abstract}
+}
+
+{
+\selectlanguage{russian}
+\begin{abstract}
+    Кырык мары йӹлмӹ - иктӹжӹ Российын шукы изи йӹлмӹвлӓ лошты, кыдылан, кого йӹлмӹвлӓ дон тӓнгӓштӓрӓш гӹнь, тинар шукы хӓдӹрӹм тӹдӹм ланзылаш дӓ переген кодаш тумаен лыкмы агыл. Пумы пӓшӓштӹ, кыды ылеш пӹтӓришӹвлӓ лошты ти тӹнгӓлтӹш ашкылвлӓштӹ цела кырык мары парсерым ӹштӹмӹ корнышты, мӓ ӹшке ӹштӹмӹнӓ Портерын стеммерым пумы йӹлмӹлӓн анжыктенӓ.
+\end{abstract}
+}
+
+{
+\selectlanguage{finnish}
+\begin{abstract}
+    Vuorimarin kieli on yksi monista Venäjän vähemmistökielistä. Erotuksena suuriin kieliin, ei ole luonut paljon kojeita sen analysoidakseen ja säästäkseen. Tämä teos on yksi ensimmäisistä askelistä luodakseen täyden vuorimarin kielin parserin. Tässä on kuvannut Porterin stemmeri, jonka on luonut selle kielelle.
+\end{abstract}
+}
+
+\section{Introduction}
+
+Hill Mari language is one of the minor languages of Russia belonging to the Uralic family. Unlike major languages, the number of NLP-tools developed and/or applied for it is minimal due to the lack of data and IT-specialists with good knowledge of it. Creation of some basic tools like morphological analyzer and parser could be a great contribution to both NLP studies and preservation of the Hill Mari. \newline
+Our main goal is to create a proper Hill Mari parser which would be useful for researchers and creating resources for it, e.g. a corpus. Since this language is a synthetic language with a great variety of potential agglutinative forms, a good stemmer is substantial for creating any other computational tool since Hill Mari's morphological productivity makes any kind of statistical analysis without it problematical. \newline
+The algorithm chosen for this task is the Snowball algorithm, which is modification of a Porter stemming algorithm first presented in 1980 by Martin Porter \citep{porter}. Snowball has an implementation in Python NLTK package \footnote{\url{https://www.nltk.org/_modules/nltk/stem/snowball.html}} and a living society of developers and contributors.
+
+\section{Method}
+
+There are three major stemming algorithms today: Porter\footnote{Described in \citep{porter}}, Snowball (which is actually a modification of the original Porter algorithm) and Lancaster. Each of them has its own features, though Porter and Snowball are rather the simular to each other. The most important difference is the greediness of the algorithm - Lancaster is  considered to be the greediest one. \newline
+
+The algorithm itself is not too complicated. The basic term in use is \textit{m}, which is callted \textit{measure} of any word which matches the pattern of
+\begin{align*}
+\begin{split}
+&CVCV \cdots C \\
+&CVCV \cdots V \\
+&VCVC \cdots C \\
+&VCVC \cdots V
+\end{split}
+\end{align*} 
+where \textit{C} is a list of consonants or, more precisely, letters denoting consonant sounds, the length of which is above 0. Correspondingly \textit{V} is a list of letters denoting vowel sounds, the length of which is above 0 as well. \newline
+
+Two other essential terms are \textit{r1} and \textit{r2}. Both of them are particular regions of a word. According to definitions from \citep{snowball_old}:
+
+\begin{itemize}
+    \item \textit{r1} is the region after the first non-vowel following a vowel, or is the null region at the end of the word if there is no such non-vowel.
+    \item \textit{r2} is the region after the first non-vowel following a vowel in R1, or is the null region at the end of the word if there is no such non-vowel.
+\end{itemize}
+
+Vowels are defined differently from language to language. For example, in English a vowel is a letter belonging to the set of  \textit{a, e, i, o, u}  and also \textit{y} in cases when it is preceded by a consonant. \newline
+\emph{r1} and \emph{r2} are defined at each step of the parsing algorithm. At each step some of affixes get deleted, either completely or leaving parts of suffixes of further steps if their form can be influences by a deleted suffix. When the \emph{r1} has the length of 0 or when there are no more steps to perform, the program stops and gives the result as an output.
+
+There are also different kind of suffixed defined for the algorithm \citep{snowball_old}.
+
+\begin{itemize}
+    \item An a-suffix, or attached suffix, is a particle word attached to another word.
+    \item An i-suffix, or inflectional suffix, forms part of the basic grammar of a language, and is applicable to all words of a certain grammatical type, with perhaps a small number of exceptions.
+    \item A d-suffix, or derivational suffix, enables a new word, often with a different grammatical category, or with a different sense, to be built from another word. Whether a d-suffix can be attached is discovered not from the rules of grammar, but by referring to a dictionary.
+\end{itemize}
+
+However, it seems that for the Uralic languages these distinctions are not that sharp. Their elaborated morphological systems allow suffixes of different groups to be applied to different parts of speech and derivatives while being strictly defined at the same time.
+
+\section{Hill Mari stemmer} \label{hm}
+
+Hill Mari language, also known as Western Mari, belongs to the Finno-Volgaic group which belongs to the Uralic language family. It is closely related to the Meadow Mari language (also known as Eastern Mari, and sometimes even regarded as its dialect. Both languages are co-official with Russian in the Mari El republic. \newline
+Hill Mari uses a modified version of Cyrillic Alphabet which includes all the letters of the Russian languages and 4 additional letters which denote front vowels. \\
+The 36 vowels of the Hill Mari language are as follows.
+
+\begin{table}[!h]
+    \centering
+    \begin{tabular}{cccccc}
+         А а & Ӓ ӓ & Б б & В в & Г г & Д д \\
+         Е е & Ё ё & Ж ж & З з & И и & К к \\
+         Л л & М м & Н н & О о & Ӧ ӧ & П п \\
+         Р р & С с & Т т & У у & Ӱ ӱ & Ф ф \\
+         Х х & Ц ц & Ч ч & Ш ш & Щ щ & Ъ ъ \\
+         Ы ы & Ӹ ӹ & Ь ь & Э э & Ю ю & Я я
+    \end{tabular}
+    \caption{Hill Mari alphabet}
+    \label{tab:HM_alphabet}
+\end{table}
+
+The vowels are represented in this alphabet by letters \textit{а, ӓ, е, ё, и, о, ӧ, у, ӱ, ы, ӹ, э, ю} and \textit{я}. A 'consonant' in a word is therefore any letter which does not belong to this list. The letters \textit{е, ё, ю, я} denote iotated vowels and therefore sound like \textit{/ja/} in initial or post-vocalic position, as well as in Russian; all other 'vowel letters' denote vowel sounds in all possible positions. Thus, any vowel letter constitutes a vowel sound, so \emph{r1} and \emph{r2} are defined the usual way and do not require additional rules.\newline
+
+
+As all Uralic languages, Hill Mari is amenable to stemming. The borders between morphemes are normally clear, and the form of a morpheme is usually the same, except for the cases when vocal harmony is broken. For example, if a root has a front vowel and a suffix contains a back vowel, the last one changes into a front vowel as well (\nextx). For this reason, most of affixes have more than one forms in our lists. \newline
+
+Hill Mari possesses all of \textit{a-}, \textit{i-} and \textit{d-}suffixes \citep{snowball_old}, however, just like in Finnish, distinctions between them are not as strict as in Indo-European languages. In most cases, the most important  \newline
+
+
+
+Another notion worth making is the existence of connegative verbal forms. In most cases connegative form is basically a stem of a verb (\nextx) while in other cases this form may have an additional affix (\ref{kerdep}).
+
+\ex
+\begingl
+\gla а-к шо //
+\glb {\sc neg.npst-3} come //
+\glft `[he/she] does not come / is not coming' //
+\endgl
+\xe
+
+\ex \label{kerdep}
+\begingl
+\gla а-к керд-еп //
+\glb {\sc neg.npst-3} can{\sc -pl}//
+\glft `[they] can not' //
+\endgl
+\xe
+
+Normalizing such forms is easier than stronger, however, since a stemmer is supposed to receive just a singe word, we use a list of connegative forms extracted from our corpora of poetry and Tsikma\footnote{\url{https://tsikma.wordpress.com/}} articles in order to check if an input word belongs to it and therefore avoid missteming. \newline
+
+\subsection{The steps}
+
+All in all, our algorithm performs 4 steps, some of which are repeated multiple times in some cases. At each step, the program searches for the longest for the longest suffix in use of a particular step in \emph{r1}, deletes it and switches to the next step.
+
+\subsubsection{Input}
+
+For now, the input is a single word but that could be changed in future. This actually a serious disadvantage for word form like connegative mentioned in section \ref{hm}. However, this is how a standard NLTK stemmer class is supposed to work, so we decided to follow this rule.
+
+\subsubsection{Step 0}
+
+An input word is searched for in the list of stop words (which includes neutral forms of postpositions, several pronouns and conjugations), connegative verb forms and some others. If it is found, the unchanged word is returned.
+
+\subsubsection{Step 1}
+At this step, plurality and focus particles get deleted. As these morphemes are always the last in any word form, they have to be deleted first, however, the plurality suffix \textit{-влӓ} is deleted after the particles since they can be attached even to it.
+
+\subsubsection{Step 2}
+
+At this step, adjectival and numeral suffixes, noun and verb endings are deleted. At the same time groups of suffixes for more grammaticalized words with less regular paradigms such are personal pronouns and a reflexive pronoun \emph{(ӹ)шкӹ '[self'} also get stripped if this is the case.
+The next step differs, depending on suffixes of which group got deleted.
+
+\subsubsection{Step 3}
+
+If nothing was stripped, the program tries to delete verbal derivation suffixes, non-finite verbal suffixes or possessiveness. If a verbal derivational suffix is found, the program tries to delete it once again since verbal derivation in Hill Mari may use more than one suffix.
+
+\subsubsection{Output}
+
+The output is a stem of the input word or, in case nothing has been removed or the input word was classified as a stop word, the word itself.
+
+\section{Conclusion}
+
+This is a general description of the way our algorithm works. The stemmer is extremely useful for further development. It already pays attention to some part of speech features, furthermore, at each step a deleted suffix can be stored in memory and this could be a base for a morphological analysis and lemmatization. All in all, that was the first and one of the most important step of our work. 
+
+\nocite{*}
+\bibliographystyle{acl_natbib}
+\bibliography{iwclul}
+
+\end{document}
+
