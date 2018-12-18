@@ -1,5 +1,6 @@
-# Sources for corpora:
+# Sources for corpora
 
+## Included
 * [Tsikma](https://tsikma.wordpress.com/) - online Hill Mari Media; both articles and comments to them are included.
 * [Wikisources](https://wikisource.org/wiki/Category:Hill_Mari) - Hill Mari poetry from the Wikisources.
 * [Children Stories](http://www.finnougoria.ru/logos/child_lit/2333/) - Some pieces of Hill Mari writer Afanasiev Valentin (Ondrin)
