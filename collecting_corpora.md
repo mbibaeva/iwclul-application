@@ -11,7 +11,7 @@
 
 ## All in all
 
-* Tokens: 230328
+* Tokens: 230301
 * Unique wordforms: 35638
 
 
